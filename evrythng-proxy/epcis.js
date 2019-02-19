@@ -351,3 +351,4 @@ class AggregationEvent extends EPCISEvent {
 }
 
 exports.ObjectEvent = ObjectEvent;
+exports.AggregationEvent = AggregationEvent;

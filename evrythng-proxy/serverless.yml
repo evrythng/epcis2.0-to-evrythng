@@ -67,6 +67,38 @@ functions:
       - http:
           path: capture
           method: post
+
+  eventType:
+    handler: handler.getEventTypes
+    events:
+      - http:
+          path: events
+          method: get
+
+  events:
+    handler: handler.getEvents
+    events:
+      - http:
+          path: events/{eventType}
+          method: get
+          request:
+            parameters:
+              path:
+                eventType: true
+  eventsById:
+    handler: handler.getEventById
+    events:
+      - http:
+          path: events/{eventType}/{eventID}
+          method: get
+          request:
+            parameters:
+              path:
+                eventType: true
+                eventID: true
+
+
+
 #      - s3: ${env:BUCKET}
 #      - schedule: rate(10 minutes)
 #      - sns: greeter-topic
