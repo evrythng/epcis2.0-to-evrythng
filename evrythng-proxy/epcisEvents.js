@@ -1,5 +1,6 @@
 'use strict';
 
+
 const print = console.log
 
 const epcToTuple = epc => [epc.slice(0, epc.lastIndexOf(':')), epc.slice(epc.lastIndexOf(':') + 1,)]
@@ -352,3 +353,5 @@ class AggregationEvent extends EPCISEvent {
 
 exports.ObjectEvent = ObjectEvent;
 exports.AggregationEvent = AggregationEvent;
+
+// exports.getEventsByType = app = async

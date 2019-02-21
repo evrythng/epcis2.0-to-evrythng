@@ -49,6 +49,7 @@ provider:
 package:
   include:
     - events.js
+    - epcisquery.js
     - node_modules/**
 #    - include-me-dir/**
   exclude:
@@ -85,6 +86,11 @@ functions:
             parameters:
               path:
                 eventType: true
+              querystrings:
+                $filter: true
+              headers:
+                Authorization: true
+
   eventsById:
     handler: handler.getEventById
     events:
@@ -96,6 +102,16 @@ functions:
               path:
                 eventType: true
                 eventID: true
+              headers:
+                Authorization: true
+
+  debug:
+    handler: handler.debug
+    events:
+      - http:
+          path: debug
+          method: get
+
 
 
 

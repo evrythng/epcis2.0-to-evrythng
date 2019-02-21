@@ -1,13 +1,15 @@
 'use strict';
+
 const {TrustedApp} = require('evrythng-extended');
-const epcis = require('./epcis');
+const epcisEvents = require('./epcisEvents');
+const epcisquery = require('./epcisquery');
 
 
 module.exports.capture = async (events, context) => {
     const app = new TrustedApp(events.headers.Authorization.trim());
     const createdEvents = [];
     for (const event of JSON.parse(events.body).epcisBody.eventList) {
-        let e = new epcis[event.isA](event, app);
+        let e = new epcisEvents[event.isA](event, app);
         e.init();
         e._tags.push('DEBUG');
         createdEvents.push(await app.action('all').create(e.asEVTActionDocument()).then());
@@ -22,41 +24,62 @@ module.exports.getEventTypes = async (events, context) => {
 
     return {
         statusCode: 200,
-        body: JSON.stringify(Object.keys(epcis).filter(e => e.endsWith('Event'))),
+        body: JSON.stringify(Object.keys(epcisEvents).filter(e => e.endsWith('Event'))),
     };
 };
 
 
 module.exports.getEvents = async (events, context) => {
+    console.log(JSON.stringify(events));
     const app = new TrustedApp(events.headers.Authorization.trim());
     const epcisEventType = events.pathParameters.eventType;
-    let returnEvents;
-    if (epcisEventType === 'all') {
-        returnEvents = await Promise.all(
-            Object.keys(epcis)
-                .filter(e => e.endsWith('Event'))
-                .map(a => app.action('_' + a).read().then())).then()
-    } else {
-        returnEvents = await app.action('_' + epcisEventType).read().then();
+
+    let evtQuery = epcisquery.simpleEventLookupQuery(epcisEventType);
+    if (events.queryStringParameters!==null && events.queryStringParameters.hasOwnProperty('$filter')) {
+        evtQuery+=`&${epcisquery.filter(events.queryStringParameters['$filter'])}`;
+        epcisquery.eventTypeConstraintConsistency(evtQuery);
     }
+    let returnedEvents = [];
+    returnedEvents = await app.action('all').read({
+        params: {
+            filter: evtQuery
+        }
+    }).then();
+    if (returnedEvents.length>0)
+        returnedEvents = returnedEvents.map(x => x.customFields);
     return {
         statusCode: 200,
-        body: JSON.stringify(returnEvents.filter(x=>x.length>0).map(x=>x).concat((x,y)=>x.concat(y))[0].filter(x=>x.hasOwnProperty('customFields')).map(x=>x.customFields)),
-    }
+        body: JSON.stringify(returnedEvents)
+    };
 };
 
 
 module.exports.getEventById = async (events, context) => {
+    console.log(JSON.stringify(events))
     const app = new TrustedApp(events.headers.Authorization.trim());
     const epcisEventType = events.pathParameters.eventType;
-    const eventId = events.pathParameters.eventID.trim();
-    let returnedEvent = await app.action('_' + epcisEventType).read({
+    let eventId = events.pathParameters.eventID;
+
+    let returnedEvents = await app.action('all').read({
         params: {
-            filter: "identifiers.eventID=" + eventId
+            filter: epcisquery.simpleEventLookupQuery(epcisEventType, eventId)
         }
     }).then();
+    if (returnedEvents.length>0)
+        returnedEvents = returnedEvents.map(x => x.customFields);
     return {
         statusCode: 200,
-        body: JSON.stringify(returnedEvent[0].customFields),
+        body: JSON.stringify(returnedEvents),
     }
 };
+
+
+module.exports.debug = async (events, context) => {
+    console.log(JSON.stringify(events));
+
+    return {
+        statusCode: 200,
+        body: JSON.stringify(events),
+    }
+};
+
