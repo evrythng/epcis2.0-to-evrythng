@@ -38,6 +38,8 @@ Project structure:
 
 You'll need an [EVRYTHNG](https://dashboard.evrythng.com) account and a [Trusted App API](https://developers.evrythng.com/docs/api-key-scopes-and-permissions#section-trusted-application-api-key) key to use this service. 
 
+**If you don't provide an API key, you'll use the default public EPCIS 2.0 account on EVRYTHNG**. 
+
 ### Capturing EPCIS Events
 
 To create your first ObjectEvents, try:
@@ -54,7 +56,11 @@ Response
 [{"id":"U6D4GbF3Kn5snAawan9q4gge","createdAt":1550487945956,"customFields":{"action":"ADD","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:fosstrak:demo:bizstep:fmcg:production","bizTransactionList":[{"bizTransaction":"http://transaction.acme.com/po/12345678","type":"urn:epcglobal:cbv:btt:po"},{"bizTransaction":"urn:epcglobal:cbv:bt:0614141073467:1152","type":"urn:epcglobal:cbv:btt:desadv"}],"destinationList":[{"destination":"urn:epc:id:sgln:0614141.00001.0","type":"urn:epcglobal:cbv:sdt:owning_party"}],"disposition":"urn:fosstrak:demo:disp:fmcg:pendingQA","epcList":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"eventID":"_:event2","eventTime":"2008-11-09T13:30:17Z","eventTimeZoneOffset":"+00:00","isA":"ObjectEvent","readPoint":"urn:epc:id:sgln:0614141.00777.0","sourceList":[{"source":"urn:epc:id:sgln:4012345.00001.0","type":"urn:epcglobal:cbv:sdt:possessing_party"}]},"tags":["readPoint:urn:epc:id:sgln:0614141.00777.0","epcisAction:ADD","bizLocation:urn:epc:id:sgln:0614141.00888.0","DEBUG"],"timestamp":1226237417000,"type":"_ObjectEvent","location":{"latitude":39.0481,"longitude":-77.4728,"position":{"type":"Point","coordinates":[-77.4728,39.0481]}},"locationSource":"geoIp","context":{"ipAddress":"35.174.185.11","city":"Ashburn","region":"Virginia","countryCode":"US","timeZone":"America/New_York"},"createdByProject":"UMf2DkcMbXAhy8waRmN2Dmxf","createdByApp":"U6C3NyfNDwQhshawRqXWAwss","identifiers":{}}]
 ```
 
-### Interacting with EPCIS Events
+### Querying EPCIS Events
 
-- List all Object event: `/events/ObjectEvent`
-- Retrieve ObjectEvent _
+Use this `https://9kr88qvs8c.execute-api.us-east-1.amazonaws.com/labs/` service to experiment with the gateway
+
+- List all object event: `/events/ObjectEvent`
+- Retrieve all object and aggregation events that occured at the business location `urn:epc:id:sgln:0614141.00888.0`: '/events/all?$filter=eventType in (ObjectEvent, AggregationEvent)&bizLocation eq urn:epc:id:sgln:0614141.00888.0'
+
+

@@ -50,6 +50,7 @@ package:
   include:
     - events.js
     - epcisquery.js
+    - publicaccess.secret
     - node_modules/**
 #    - include-me-dir/**
   exclude:
@@ -60,14 +61,13 @@ package:
 functions:
   capture:
     handler: handler.capture
-
-#    The following are a few example events you can configure
-#    NOTE: Please make sure to change your handler code to work with those events
-#    Check the event documentation for details
     events:
       - http:
           path: capture
           method: post
+          parameters:
+            headers:
+              Authorization: false
 
   eventType:
     handler: handler.getEventTypes
@@ -75,6 +75,9 @@ functions:
       - http:
           path: events
           method: get
+          parameters:
+            headers:
+              Authorization: false
 
   events:
     handler: handler.getEvents
@@ -89,7 +92,7 @@ functions:
               querystrings:
                 $filter: true
               headers:
-                Authorization: true
+                Authorization: false
 
   eventsById:
     handler: handler.getEventById
@@ -103,7 +106,7 @@ functions:
                 eventType: true
                 eventID: true
               headers:
-                Authorization: true
+                Authorization: false
 
   debug:
     handler: handler.debug
