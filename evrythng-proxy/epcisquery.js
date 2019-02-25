@@ -4,14 +4,14 @@ const querystring = require('querystring');
 const epcisEvents = require('./epcisEvents');
 
 const operatorMapping = {
-    'eq': (x, y) => `${x}=${y}`,
+    'eq': (x, y, r) => `${x}=${r?r:""}${y}`,
     'in': (x, y, r) => {
         return expandList(x, '=', parseArgsList(y), r)
     },
-    'gt': (x, y) => `${x}>${y}`,
-    'ge': (x, y) => `${x}>=${y}`,
-    'lt': (x, y) => `${x}<${y}`,
-    'le': (x, y) => `${x}<${y}`,
+    'gt': (x, y, r) => `${x}>${r?r:""}${y}`,
+    'ge': (x, y, r) => `${x}>=${r?r:""}${y}`,
+    'lt': (x, y, r) => `${x}<${r?r:""}${y}`,
+    'le': (x, y, r) => `${x}<${r?r:""}${y}`,
 };
 
 function binaryExp(exp) {
@@ -31,7 +31,7 @@ function binaryExp(exp) {
 function expandList(leftArg, op, rightArgs, rightPrefix) {
     if (rightPrefix === undefined)
         rightPrefix = '';
-    let rightArg = `${rightPrefix}${rightArgs.pop()}`;
+    const rightArg = `${rightPrefix}${rightArgs.pop()}`;
     if (rightArgs.length === 0) {
         return `${leftArg}${op}${rightArg}`
     } else {
@@ -40,7 +40,7 @@ function expandList(leftArg, op, rightArgs, rightPrefix) {
 }
 
 function parseArgsList(args) {
-    return args.replace(/[()]/g, "").trim().split(',')
+    return args.replace(/[()]/g, "").trim().split(',').map(s=>s.trim())
 }
 
 
@@ -82,6 +82,10 @@ exports.filter = query => {
                 case 'readPoint':
                     left = 'tags';
                     rightPrefix = 'readPoint:';
+                    break;
+                case 'bizLocation':
+                    left = 'tags';
+                    rightPrefix = 'bizLocation:';
                     break;
             }
             queryTokens.push(operatorMapping[op](left, right, rightPrefix));
