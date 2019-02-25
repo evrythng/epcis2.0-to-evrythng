@@ -1,6 +1,6 @@
 # EPCIS 2.0 Proxy Implementation for EVRYTHNG
 
-A proxy to use the upcoming EPCIS 2.0 standard with EVRYTHNG. EPCIS 2.0 is the latest update of the GS1 EPCIS standard and is currently being developed by GSMP EPCIS and CBV 2.0 MSWG.
+A proxy to use the upcoming EPCIS 2.0 standard with the EVRYTHNG API. EPCIS 2.0 is the latest update of the GS1 EPCIS standard and is currently being developed by the EPCIS and CBV 2.0 MSWG. The standard has not been ratified yet, hence consider everything you see here tentative.
 
 ## Related projects
 
@@ -12,7 +12,7 @@ A proxy to use the upcoming EPCIS 2.0 standard with EVRYTHNG. EPCIS 2.0 is the l
  
 ## Setup
 
-Requirements:
+### Requirements:
 
 - Node version > 8.0
 - Serverless version >= 1.36.3
@@ -21,7 +21,7 @@ Requirements:
 - [Trusted App API](https://developers.evrythng.com/docs/api-key-scopes-and-permissions#section-trusted-application-api-key)
 - [Custom Action types](https://developers.evrythng.com/reference/action-types) `_ObjectEvent`, `_AggregationEvent` 
 
-Installation:
+### Installation:
 
 - Make sure serverless is installed globally `npm install serverless -g`
 - If you're deploying the gateway for the first time, [follow these instructions](https://serverless.com).
@@ -29,7 +29,7 @@ Installation:
 - Deploy the new gateway `serverless deploy`
 - Debugging information can be obtained by inspecting log files. For example, to read the latest log files for the capture interface, type `serverless logs -f capture`
 
-Project structure:
+### Project structure:
 
 - [evrythng-proxy](evrythng-proxy) contains the EPCIS 2.0 proxy, that will be deployed on AWS
 - [example-event.json](example-event.json) contains a sample paylaod to test the proxy
@@ -58,9 +58,12 @@ Response
 
 ### Querying EPCIS Events
 
-Use this `https://9kr88qvs8c.execute-api.us-east-1.amazonaws.com/labs/` service to experiment with the gateway
+Use this `https://9kr88qvs8c.execute-api.us-east-1.amazonaws.com/labs` service to experiment with the gateway
 
 - List all object event: `/events/ObjectEvent`
-- Retrieve all object and aggregation events that occured at the business location `urn:epc:id:sgln:0614141.00888.0`: '/events/all?$filter=eventType in (ObjectEvent, AggregationEvent)&bizLocation eq urn:epc:id:sgln:0614141.00888.0'
+- Retrieve all object and aggregation events that occured at the business location `urn:epc:id:sgln:0614141.00888.0`: 
 
+```
+'/events/all?$filter=eventType in (ObjectEvent, AggregationEvent)&bizLocation eq urn:epc:id:sgln:0614141.00888.0'
+```
 
