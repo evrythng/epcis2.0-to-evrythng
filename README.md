@@ -19,7 +19,7 @@ A proxy to use the upcoming EPCIS 2.0 standard with the EVRYTHNG API. EPCIS 2.0 
 - evrythng-extended version >= 4.7.2
 - [EVRYTHNG](https://dashboard.evrythng.com) account
 - [Trusted App API](https://developers.evrythng.com/docs/api-key-scopes-and-permissions#section-trusted-application-api-key)
-- [Custom Action types](https://developers.evrythng.com/reference/action-types) `_ObjectEvent`, `_AggregationEvent` 
+- Create two [custom Action types](https://developers.evrythng.com/reference/action-types): `_ObjectEvent`, `_AggregationEvent` 
 
 ### Installation:
 
