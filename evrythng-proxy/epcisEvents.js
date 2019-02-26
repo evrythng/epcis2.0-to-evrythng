@@ -438,8 +438,8 @@ class EPCISEvent {
         this.app = app;
         this._customFields = event;
         this._type = `_${event.isA}`;
-        if (event.hasOwnProperty('eventId')) {
-            this.identifiers.eventID = event.eventID;
+        if (event.hasOwnProperty('eventID')||event.hasOwnProperty('eventId')) {
+            this._identifiers['eventID'] = event.eventID;
         }
         if (event.hasOwnProperty('eventTime')) {
             this.timestamp = (new Date(event.eventTime)).getTime();

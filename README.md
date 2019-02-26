@@ -42,28 +42,141 @@ You'll need an [EVRYTHNG](https://dashboard.evrythng.com) account and a [Trusted
 
 ### Capturing EPCIS Events
 
-To create your first ObjectEvents, try:
+Danny Haak developed a handy [EPCIS 2.0 XML to JSON converter](https://mimasu.nl/epcis/xmljson).  To create your first ObjectEvent, take for instance the first example from [https://mimasu.nl/epcis/xmljson](https://mimasu.nl/epcis/xmljson) and try:
 
-Request
+**Request**
 
+```bash
+curl -X POST "https://epcis.evrythng.io/v2_0/capture" -H "Content-Type: application/json" -d "@-" <<EOF
+{
+  "@context": "https://id.gs1.org/epcis-context.jsonld",
+  "isA": "EPCISDocument",
+  "creationDate": "2005-07-11T11:30:47+00:00",
+  "schemaVersion": 1.2,
+  "format": "application/ld+json",
+  "epcisBody": {
+    "eventList": [
+      {
+        "isA": "ObjectEvent",
+        "eventTime": "2005-04-03T20:33:31.116-06:00",
+        "eventTimeZoneOffset": "-06:00",
+        "epcList": [
+          "urn:epc:id:sgtin:0614141.107346.2017",
+          "urn:epc:id:sgtin:0614141.107346.2018"
+        ],
+        "action": "OBSERVE",
+        "bizStep": "urn:epcglobal:cbv:bizstep:shipping",
+        "disposition": "urn:epcglobal:cbv:disp:in_transit",
+        "readPoint": "urn:epc:id:sgln:0614141.07346.1234",
+        "bizTransactionList": [
+          {
+            "type": "urn:epcglobal:cbv:btt:po",
+            "bizTransaction": "http://transaction.acme.com/po/12345678"
+          }
+        ]
+      },
+      {
+        "isA": "ObjectEvent",
+        "eventTime": "2005-04-04T20:33:31.116-06:00",
+        "eventTimeZoneOffset": "-06:00",
+        "epcList": [
+          "urn:epc:id:sgtin:0614141.107346.2018"
+        ],
+        "action": "OBSERVE",
+        "bizStep": "urn:epcglobal:cbv:bizstep:receiving",
+        "disposition": "urn:epcglobal:cbv:disp:in_progress",
+        "readPoint": "urn:epc:id:sgln:0012345.11111.400",
+        "bizLocation": "urn:epc:id:sgln:0012345.11111.0",
+        "bizTransactionList": [
+          {
+            "type": "urn:epcglobal:cbv:btt:po",
+            "bizTransaction": "http://transaction.acme.com/po/12345678"
+          },
+          {
+            "type": "urn:epcglobal:cbv:btt:desadv",
+            "bizTransaction": "urn:epcglobal:cbv:bt:0614141073467:1152"
+          }
+        ],
+        "example:myField": {
+          "@xmlns:example": "http://ns.example.com/epcis",
+          "#text": "Example of a vendor/user extension"
+        }
+      }
+    ]
+  }
+}
+EOF
 ```
-curl -X POST "https://9kr88qvs8c.execute-api.us-east-1.amazonaws.com/labs/capture" -H "Content-Type: application/json"  -H "Authorization:TRUSTED APP API KEY" -d @example-event.json
-```
 
-Response
+**Response**
 
-```
-[{"id":"U6D4GbF3Kn5snAawan9q4gge","createdAt":1550487945956,"customFields":{"action":"ADD","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:fosstrak:demo:bizstep:fmcg:production","bizTransactionList":[{"bizTransaction":"http://transaction.acme.com/po/12345678","type":"urn:epcglobal:cbv:btt:po"},{"bizTransaction":"urn:epcglobal:cbv:bt:0614141073467:1152","type":"urn:epcglobal:cbv:btt:desadv"}],"destinationList":[{"destination":"urn:epc:id:sgln:0614141.00001.0","type":"urn:epcglobal:cbv:sdt:owning_party"}],"disposition":"urn:fosstrak:demo:disp:fmcg:pendingQA","epcList":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"eventID":"_:event2","eventTime":"2008-11-09T13:30:17Z","eventTimeZoneOffset":"+00:00","isA":"ObjectEvent","readPoint":"urn:epc:id:sgln:0614141.00777.0","sourceList":[{"source":"urn:epc:id:sgln:4012345.00001.0","type":"urn:epcglobal:cbv:sdt:possessing_party"}]},"tags":["readPoint:urn:epc:id:sgln:0614141.00777.0","epcisAction:ADD","bizLocation:urn:epc:id:sgln:0614141.00888.0","DEBUG"],"timestamp":1226237417000,"type":"_ObjectEvent","location":{"latitude":39.0481,"longitude":-77.4728,"position":{"type":"Point","coordinates":[-77.4728,39.0481]}},"locationSource":"geoIp","context":{"ipAddress":"35.174.185.11","city":"Ashburn","region":"Virginia","countryCode":"US","timeZone":"America/New_York"},"createdByProject":"UMf2DkcMbXAhy8waRmN2Dmxf","createdByApp":"U6C3NyfNDwQhshawRqXWAwss","identifiers":{}}]
+```python
+[{"action":"OBSERVE","bizStep":"urn:epcglobal:cbv:bizstep:shipping","bizTransactionList":[{"bizTransaction":"http://transaction.acme.com/po/12345678","type":"urn:epcglobal:cbv:btt:po"}],"disposition":"urn:epcglobal:cbv:disp:in_transit","epcList":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"eventTime":"2005-04-03T20:33:31.116-06:00","eventTimeZoneOffset":"-06:00","isA":"ObjectEvent","readPoint":"urn:epc:id:sgln:0614141.07346.1234"},{"action":"OBSERVE","bizLocation":"urn:epc:id:sgln:0012345.11111.0","bizStep":"urn:epcglobal:cbv:bizstep:receiving","bizTransactionList":[{"bizTransaction":"http://transaction.acme.com/po/12345678","type":"urn:epcglobal:cbv:btt:po"},{"bizTransaction":"urn:epcglobal:cbv:bt:0614141073467:1152","type":"urn:epcglobal:cbv:btt:desadv"}],"disposition":"urn:epcglobal:cbv:disp:in_progress","epcList":["urn:epc:id:sgtin:0614141.107346.2018"],"eventTime":"2005-04-04T20:33:31.116-06:00","eventTimeZoneOffset":"-06:00","example:myField":{"#text":"Example of a vendor/user extension","@xmlns:example":"http://ns.example.com/epcis"},"isA":"ObjectEvent","readPoint":"urn:epc:id:sgln:0012345.11111.400"}]
 ```
 
 ### Querying EPCIS Events
 
-Use this `https://9kr88qvs8c.execute-api.us-east-1.amazonaws.com/labs` service to experiment with the gateway
+Use this `https://epcis.evrythng.io/v2_0/events` service to experiment with the gateway
 
-- List all object event: `/events/ObjectEvent`
-- Retrieve all object and aggregation events that occured at the business location `urn:epc:id:sgln:0614141.00888.0`: 
+#### List supported EPCIS event types
+
+#### Show me all events
+
+
+
+Try this link to get a list of [all events](https://k9kmw526t2.execute-api.us-east-1.amazonaws.com/events) from your browser. With curl:
+**Request**
+
+ curl https://epcis.evrythng.io/v2_0/events/all -H "Content-Type: application/json"
+
+**Response**
+
+```python
+[{"action":"OBSERVE","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:epcglobal:cbv:bizstep:receiving","childEPCs":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"childQuantityList":[{"epcClass":"urn:epc:idpat:sgtin:4012345.098765.*","quantity":"10"},{"epcClass":"urn:epc:class:lgtin:4012345.012345.998877","quantity":"200.5","uom":"KGM"}],"disposition":"urn:epcglobal:cbv:disp:in_progress","eventTime":"2013-06-08T14:58:56.591Z","eventTimeZoneOffset":"+02:00","example:myField":"Example of a vendor/user extension","id":"_:event3","isA":"AggregationEvent","parentID":"urn:epc:id:sscc:0614141.1234567890","readPoint":"urn:epc:id:sgln:0614141.00777.0"}]
 
 ```
-/events/all?$filter=eventType in (ObjectEvent, AggregationEvent)&bizLocation eq urn:epc:id:sgln:0614141.00888.0
+...
+
+
+#### Show me all events of the type ObjectEvent
+
+
+
+Try this link to get a list of [ObjectEvents](https://epcis.evrythng.io/v2_0/events/ObjectEvent) from your browser. With curl:
+**Request**
+
+ curl https://epcis.evrythng.io/v2_0/events/ObjectEvent -H "Content-Type: application/json"
+
+**Response**
+
+```python
+[{"action":"ADD","bizLocation":"urn:epc:id:sgln:0614141.00888.1","bizStep":"urn:fosstrak:demo:bizstep:fmcg:production","bizTransactionList":[{"bizTransaction":"http://transaction.acme.com/po/12345678","type":"urn:epcglobal:cbv:btt:po"},{"bizTransaction":"urn:epcglobal:cbv:bt:0614141073467:1152","type":"urn:epcglobal:cbv:btt:desadv"}],"destinationList":[{"destination":"urn:epc:id:sgln:0614141.00001.0","type":"urn:epcglobal:cbv:sdt:owning_party"}],"disposition":"urn:fosstrak:demo:disp:fmcg:pendingQA","epcList":["urn:epc:id:sgtin:0614141.107346.2011","urn:epc:id:sgtin:0614141.107346.2012"],"eventID":"_:event1","eventTime":"2008-11-09T13:30:17Z","eventTimeZoneOffset":"+00:00","isA":"ObjectEvent","readPoint":"urn:epc:id:sgln:0614141.00777.0","sourceList":[{"source":"urn:epc:id:sgln:4012345.00001.0","type":"urn:epcglobal:cbv:sdt:possessing_party"}]},{"action":"ADD","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:fosstrak:demo:bizstep:fmcg:production","bizTransactionList":[{"bizTransaction":"http://transaction.acme.com/po/12345678","type":"urn:epcglobal:cbv:btt:po"},{"bizTransaction":"urn:epcglobal:cbv:bt:0614141073467:1152","type":"urn:epcglobal:cbv:btt:desadv"}],"destinationList":[{"destination":"urn:epc:id:sgln:0614141.00001.0","type":"urn:epcglobal:cbv:sdt:owning_party"}],"disposition":"urn:fosstrak:demo:disp:fmcg:pendingQA","epcList":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"eventID":"_:event2","eventTime":"2008-11-09T13:30:17Z","eventTimeZoneOffset":"+00:00","isA":"ObjectEvent","readPoint":"urn:epc:id:sgln:0614141.00777.0","sourceList":[{"source":"urn:epc:id:sgln:4012345.00001.0","type":"urn:epcglobal:cbv:sdt:possessing_party"}]}]
 ```
 
+#### Show me ObjectEvent `_:event1`
+
+Try this link to access [`_:event1`](https://epcis.evrythng.io/v2_0/events/ObjectEvent/_:event) from your browser. With curl:
+
+**Request**
+
+```bash
+ curl https://epcis.evrythng.io/v2_0/events/ObjectEvent/_:event1 -H "Content-Type: application/json"
+ ```
+ ```python
+ [{"action":"ADD","bizLocation":"urn:epc:id:sgln:0614141.00888.1","bizStep":"urn:fosstrak:demo:bizstep:fmcg:production","bizTransactionList":[{"bizTransaction":"http://transaction.acme.com/po/12345678","type":"urn:epcglobal:cbv:btt:po"},{"bizTransaction":"urn:epcglobal:cbv:bt:0614141073467:1152","type":"urn:epcglobal:cbv:btt:desadv"}],"destinationList":[{"destination":"urn:epc:id:sgln:0614141.00001.0","type":"urn:epcglobal:cbv:sdt:owning_party"}],"disposition":"urn:fosstrak:demo:disp:fmcg:pendingQA","epcList":["urn:epc:id:sgtin:0614141.107346.2011","urn:epc:id:sgtin:0614141.107346.2012"],"eventID":"_:event1","eventTime":"2008-11-09T13:30:17Z","eventTimeZoneOffset":"+00:00","isA":"ObjectEvent","readPoint":"urn:epc:id:sgln:0614141.00777.0","sourceList":[{"source":"urn:epc:id:sgln:4012345.00001.0","type":"urn:epcglobal:cbv:sdt:possessing_party"}]}]
+```
+#### Use the `$filter` functionality to search for events
+
+List events that are either Aggregation or Object Events and that occurred at the business location `urn:epc:id:sgln:0614141.00888.0`
+
+**Request**
+
+```bash
+curl -X GET "https://epcis.evrythng.io/v2_0/events/all?$filter=eventType+in+(ObjectEvent,AggregationEvent)&bizLocation+eq+urn:epc:id:sgln:0614141.00888.0" -H "Content-Type: application/json"
+``` 
+
+**Response**
+
+```python
+[{"action":"OBSERVE","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:epcglobal:cbv:bizstep:receiving","childEPCs":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"childQuantityList":[{"epcClass":"urn:epc:idpat:sgtin:4012345.098765.*","quantity":"10"},{"epcClass":"urn:epc:class:lgtin:4012345.012345.998877","quantity":"200.5","uom":"KGM"}],"disposition":"urn:epcglobal:cbv:disp:in_progress","eventTime":"2013-06-08T14:58:56.591Z","eventTimeZoneOffset":"+02:00","example:myField":"Example of a vendor/user extension","id":"_:event3","isA":"AggregationEvent","parentID":"urn:epc:id:sscc:0614141.1234567890","readPoint":"urn:epc:id:sgln:0614141.00777.0"},{"action":"OBSERVE","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:epcglobal:cbv:bizstep:receiving","childEPCs":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"childQuantityList":[{"epcClass":"urn:epc:idpat:sgtin:4012345.098765.*","quantity":"10"},{"epcClass":"urn:epc:class:lgtin:4012345.012345.998877","quantity":"200.5","uom":"KGM"}],"disposition":"urn:epcglobal:cbv:disp:in_progress","eventTime":"2013-06-08T14:58:56.591Z","eventTimeZoneOffset":"+02:00","example:myField":"Example of a vendor/user extension","id":"_:event3","isA":"AggregationEvent","parentID":"urn:epc:id:sscc:0614141.1234567890","readPoint":"urn:epc:id:sgln:0614141.00777.0"},{"action":"OBSERVE","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:epcglobal:cbv:bizstep:receiving","childEPCs":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"childQuantityList":[{"epcClass":"urn:epc:idpat:sgtin:4012345.098765.*","quantity":"10"},{"epcClass":"urn:epc:class:lgtin:4012345.012345.998877","quantity":"200.5","uom":"KGM"}],"disposition":"urn:epcglobal:cbv:disp:in_progress","eventTime":"2013-06-08T14:58:56.591Z","eventTimeZoneOffset":"+02:00","example:myField":"Example of a vendor/user extension","id":"_:event3","isA":"AggregationEvent","parentID":"urn:epc:id:sscc:0614141.1234567890","readPoint":"urn:epc:id:sgln:0614141.00777.0"},{"action":"OBSERVE","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:epcglobal:cbv:bizstep:receiving","childEPCs":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"childQuantityList":[{"epcClass":"urn:epc:idpat:sgtin:4012345.098765.*","quantity":"10"},{"epcClass":"urn:epc:class:lgtin:4012345.012345.998877","quantity":"200.5","uom":"KGM"}],"disposition":"urn:epcglobal:cbv:disp:in_progress","eventTime":"2013-06-08T14:58:56.591Z","eventTimeZoneOffset":"+02:00","example:myField":"Example of a vendor/user extension","id":"_:event3","isA":"AggregationEvent","parentID":"urn:epc:id:sscc:0614141.1234567890","readPoint":"urn:epc:id:sgln:0614141.00777.0"},{"action":"OBSERVE","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:epcglobal:cbv:bizstep:receiving","childEPCs":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"childQuantityList":[{"epcClass":"urn:epc:idpat:sgtin:4012345.098765.*","quantity":10},{"epcClass":"urn:epc:class:lgtin:4012345.012345.998877","quantity":200.5,"uom":"KGM"}],"disposition":"urn:epcglobal:cbv:disp:in_progress","eventTime":"2013-06-08T14:58:56.591+00:00","eventTimeZoneOffset":"+02:00","example:myField":{"#text":"Example of a vendor/user extension","@xmlns:example":"http://ns.example.com/epcis"},"isA":"AggregationEvent","parentID":"urn:epc:id:sscc:0614141.1234567890","readPoint":"urn:epc:id:sgln:0614141.00777.0"},{"action":"OBSERVE","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:epcglobal:cbv:bizstep:receiving","childEPCs":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"childQuantityList":[{"epcClass":"urn:epc:idpat:sgtin:4012345.098765.*","quantity":"10"},{"epcClass":"urn:epc:class:lgtin:4012345.012345.998877","quantity":"200.5","uom":"KGM"}],"disposition":"urn:epcglobal:cbv:disp:in_progress","eventTime":"2013-06-08T14:58:56.591Z","eventTimeZoneOffset":"+02:00","example:myField":"Example of a vendor/user extension","id":"_:event3","isA":"AggregationEvent","parentID":"urn:epc:id:sscc:0614141.1234567890","readPoint":"urn:epc:id:sgln:0614141.00777.0"},{"action":"OBSERVE","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:epcglobal:cbv:bizstep:receiving","childEPCs":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"childQuantityList":[{"epcClass":"urn:epc:idpat:sgtin:4012345.098765.*","quantity":"10"},{"epcClass":"urn:epc:class:lgtin:4012345.012345.998877","quantity":"200.5","uom":"KGM"}],"disposition":"urn:epcglobal:cbv:disp:in_progress","eventTime":"2013-06-08T14:58:56.591Z","eventTimeZoneOffset":"+02:00","example:myField":"Example of a vendor/user extension","id":"_:event3","isA":"AggregationEvent","parentID":"urn:epc:id:sscc:0614141.1234567890","readPoint":"urn:epc:id:sgln:0614141.00777.0"},{"action":"OBSERVE","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:epcglobal:cbv:bizstep:receiving","childEPCs":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"childQuantityList":[{"epcClass":"urn:epc:idpat:sgtin:4012345.098765.*","quantity":"10"},{"epcClass":"urn:epc:class:lgtin:4012345.012345.998877","quantity":"200.5","uom":"KGM"}],"disposition":"urn:epcglobal:cbv:disp:in_progress","eventTime":"2013-06-08T14:58:56.591Z","eventTimeZoneOffset":"+02:00","example:myField":"Example of a vendor/user extension","id":"_:event3","isA":"AggregationEvent","parentID":"urn:epc:id:sscc:0614141.1234567890","readPoint":"urn:epc:id:sgln:0614141.00777.0"},{"action":"OBSERVE","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:epcglobal:cbv:bizstep:receiving","childEPCs":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"childQuantityList":[{"epcClass":"urn:epc:idpat:sgtin:4012345.098765.*","quantity":"10"},{"epcClass":"urn:epc:class:lgtin:4012345.012345.998877","quantity":"200.5","uom":"KGM"}],"disposition":"urn:epcglobal:cbv:disp:in_progress","eventTime":"2013-06-08T14:58:56.591Z","eventTimeZoneOffset":"+02:00","example:myField":"Example of a vendor/user extension","id":"_:event3","isA":"AggregationEvent","parentID":"urn:epc:id:sscc:0614141.1234567890","readPoint":"urn:epc:id:sgln:0614141.00777.0"},{"action":"OBSERVE","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:epcglobal:cbv:bizstep:receiving","childEPCs":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"childQuantityList":[{"epcClass":"urn:epc:idpat:sgtin:4012345.098765.*","quantity":"10"},{"epcClass":"urn:epc:class:lgtin:4012345.012345.998877","quantity":"200.5","uom":"KGM"}],"disposition":"urn:epcglobal:cbv:disp:in_progress","eventTime":"2013-06-08T14:58:56.591Z","eventTimeZoneOffset":"+02:00","example:myField":"Example of a vendor/user extension","id":"_:event3","isA":"AggregationEvent","parentID":"urn:epc:id:sscc:0614141.1234567890","readPoint":"urn:epc:id:sgln:0614141.00777.0"},{"action":"ADD","bizLocation":"urn:epc:id:sgln:0614141.00888.1","bizStep":"urn:fosstrak:demo:bizstep:fmcg:production","bizTransactionList":[{"bizTransaction":"http://transaction.acme.com/po/12345678","type":"urn:epcglobal:cbv:btt:po"},{"bizTransaction":"urn:epcglobal:cbv:bt:0614141073467:1152","type":"urn:epcglobal:cbv:btt:desadv"}],"destinationList":[{"destination":"urn:epc:id:sgln:0614141.00001.0","type":"urn:epcglobal:cbv:sdt:owning_party"}],"disposition":"urn:fosstrak:demo:disp:fmcg:pendingQA","epcList":["urn:epc:id:sgtin:0614141.107346.2011","urn:epc:id:sgtin:0614141.107346.2012"],"eventID":"_:event1","eventTime":"2008-11-09T13:30:17Z","eventTimeZoneOffset":"+00:00","isA":"ObjectEvent","readPoint":"urn:epc:id:sgln:0614141.00777.0","sourceList":[{"source":"urn:epc:id:sgln:4012345.00001.0","type":"urn:epcglobal:cbv:sdt:possessing_party"}]},{"action":"ADD","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:fosstrak:demo:bizstep:fmcg:production","bizTransactionList":[{"bizTransaction":"http://transaction.acme.com/po/12345678","type":"urn:epcglobal:cbv:btt:po"},{"bizTransaction":"urn:epcglobal:cbv:bt:0614141073467:1152","type":"urn:epcglobal:cbv:btt:desadv"}],"destinationList":[{"destination":"urn:epc:id:sgln:0614141.00001.0","type":"urn:epcglobal:cbv:sdt:owning_party"}],"disposition":"urn:fosstrak:demo:disp:fmcg:pendingQA","epcList":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"eventID":"_:event2","eventTime":"2008-11-09T13:30:17Z","eventTimeZoneOffset":"+00:00","isA":"ObjectEvent","readPoint":"urn:epc:id:sgln:0614141.00777.0","sourceList":[{"source":"urn:epc:id:sgln:4012345.00001.0","type":"urn:epcglobal:cbv:sdt:possessing_party"}]}]
+```
