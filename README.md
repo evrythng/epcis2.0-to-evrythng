@@ -64,6 +64,6 @@ Use this `https://9kr88qvs8c.execute-api.us-east-1.amazonaws.com/labs` service t
 - Retrieve all object and aggregation events that occured at the business location `urn:epc:id:sgln:0614141.00888.0`: 
 
 ```
-'/events/all?$filter=eventType in (ObjectEvent, AggregationEvent)&bizLocation eq urn:epc:id:sgln:0614141.00888.0'
+/events/all?$filter=eventType in (ObjectEvent, AggregationEvent)&bizLocation eq urn:epc:id:sgln:0614141.00888.0
 ```
 
