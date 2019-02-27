@@ -11,11 +11,14 @@
 #
 # Happy Coding!
 
-service: evrythng-proxy # NOTE: update this with your service name
+service: epcis-evrythng-proxy # NOTE: update this with your service name
 
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
 # frameworkVersion: "=X.X.X"
+
+
+
 
 provider:
   name: aws
@@ -24,6 +27,8 @@ provider:
 # you can overwrite defaults here
   stage: labs
   region: us-east-1
+
+
 
 # you can add statements to the Lambda function's IAM Role here
 #  iamRoleStatements:

@@ -129,7 +129,7 @@ exports.eventTypeConstraintConsistency = query => {
     return true;
 };
 
-exports.simpleEventLookupQuery = (epcisEventType, eventID) => {
+    exports.simpleEventLookupQuery = (epcisEventType, eventID) => {
     if (epcisEventType === undefined) {
         throw "EPCIS event type cannot be empty";
     }
