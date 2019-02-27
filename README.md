@@ -41,7 +41,7 @@ This proxy is a (partial) implementation of the [EPCIS 2.0 bindings](https://git
 - [evrythng-proxy](evrythng-proxy) contains the EPCIS 2.0 proxy, that will be deployed on AWS
 - An account on the [EVRYTHNG platform](https://dashboard.evrythng.com), which serves as backend. **If you don't provide an API key, you'll use the default public EPCIS 2.0 account on EVRYTHNG**. 
 
-## Using the proxy: Some examples
+## Some examples
 
  You can either use the default account or create our own account and project. If you don't specify an API key, you'll automatically interact with the default account. If you want to create setup your own environment, you'll need an [EVRYTHNG](https://dashboard.evrythng.com) account, create a project and within that project, create an Application to obtain a[Trusted App API](https://developers.evrythng.com/docs/api-key-scopes-and-permissions#section-trusted-application-api-key). When you use the service, include the Trusted App API key in the header `Authorization:O5yOC...7aEOwMa3o`.  
 
