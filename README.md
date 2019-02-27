@@ -134,7 +134,9 @@ Try this link to get a list of [all events](https://epcis.evrythng.io/v2_0/event
 Try this link to get a list of [ObjectEvents](https://epcis.evrythng.io/v2_0/events/ObjectEvent) from your browser. With curl:
 **Request**
 
+```bash
  curl https://epcis.evrythng.io/v2_0/events/ObjectEvent -H "Content-Type: application/json"
+```
 
 **Response**
 
@@ -151,6 +153,7 @@ Try this link to access [`_:event1`](https://epcis.evrythng.io/v2_0/events/Objec
 ```bash
  curl https://epcis.evrythng.io/v2_0/events/ObjectEvent/_:event1 -H "Content-Type: application/json"
  ```
+ 
  ```json
  [{"action":"ADD","bizLocation":"urn:epc:id:sgln:0614141.00888.1","bizStep":"urn:fosstrak:demo:bizstep:fmcg:production","bizTransactionList":[{"bizTransaction":"http://transaction.acme.com/po/12345678","type":"urn:epcglobal:cbv:btt:po"},{"bizTransaction":"urn:epcglobal:cbv:bt:0614141073467:1152","type":"urn:epcglobal:cbv:btt:desadv"}],"destinationList":[{"destination":"urn:epc:id:sgln:0614141.00001.0","type":"urn:epcglobal:cbv:sdt:owning_party"}],"disposition":"urn:fosstrak:demo:disp:fmcg:pendingQA","epcList":["urn:epc:id:sgtin:0614141.107346.2011","urn:epc:id:sgtin:0614141.107346.2012"],"eventID":"_:event1","eventTime":"2008-11-09T13:30:17Z","eventTimeZoneOffset":"+00:00","isA":"ObjectEvent","readPoint":"urn:epc:id:sgln:0614141.00777.0","sourceList":[{"source":"urn:epc:id:sgln:4012345.00001.0","type":"urn:epcglobal:cbv:sdt:possessing_party"}]}]
 ```
