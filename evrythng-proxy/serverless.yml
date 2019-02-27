@@ -25,18 +25,18 @@ provider:
   runtime: nodejs8.10
 
 # you can overwrite defaults here
-  stage: prod
+  stage: labs
   region: us-east-1
 
-#plugins:
-#  - serverless-domain-manager
-#
-#custom:
-#  customDomain:
-#    domainName: epcis.evrythng.io
-#    basePath: v2_0
-#    stage: prod
-#    createRoute53Record: true
+plugins:
+  - serverless-domain-manager
+
+custom:
+  customDomain:
+    domainName: epcis.evrythng.io
+    basePath: v2_0
+    stage: prod
+    createRoute53Record: false
 
 
 # you can add statements to the Lambda function's IAM Role here
