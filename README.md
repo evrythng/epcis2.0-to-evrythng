@@ -118,7 +118,9 @@ Try this link to get a list of [all events](https://epcis.evrythng.io/v2_0/event
 
 **Request**
 
- curl https://epcis.evrythng.io/v2_0/events/all -H "Content-Type: application/json"
+```bash
+curl https://epcis.evrythng.io/v2_0/events/all -H "Content-Type: application/json"
+```
 
 **Response**
 
