@@ -5,7 +5,7 @@ A proxy to use the upcoming EPCIS 2.0 standard with the EVRYTHNG API. EPCIS 2.0 
 
 ## Overview of the EPCIS 2.0 Proxy
 
-![Architecture](figures/EPCIS-2.0-proxy-aarchitecture.png)
+![Architecture](figures/EPCIS-2.0-proxy-architecture.png)
 
 This proxy is a (partial) implementation of the [EPCIS 2.0 bindings](https://github.com/evrythng/gs1-epcis-2.0) as a proxy for the EVRYTHNG platform. Currently supported are the `/capture` and `/events` endpoints. `/capture` is to store events, `/events` is to access events individually or entire event collections. The `/queries` endpoint will allow clients to run complex queries and to subscribe to queries to receive real-time updates when new events emerge that meet the query constraints. If you have an [EVRYTHNG account](https://dashboard.evrythng.com), you can view events as Actions.
  
