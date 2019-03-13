@@ -499,7 +499,7 @@ exports.ObjectEvent = ObjectEvent;
 exports.AggregationEvent = AggregationEvent;
 exports.printEvent = eventAction => {
     const customFields = eventAction.customFields||{};
-    // recordTime is required by EPCIS. Since this timestamp is created by the backend, it won't be in a custom field.
+    // recordTime is required by EPCIS. Since this timestamp is created by the backend, it will not be in a custom field.
     customFields.recordTime = (new Date(eventAction.createdAt)).toISOString();
     return customFields;
 };

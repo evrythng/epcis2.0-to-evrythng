@@ -54,8 +54,8 @@ module.exports.getEvents = async (events, context) => {
             evtQuery += `&${epcisquery.filter(events.queryStringParameters['$filter'])}`;
             epcisquery.eventTypeConstraintConsistency(evtQuery);
         }
-        let returnedEvents = [];
-        returnedEvents = await app.action('all').read({
+
+        let returnedEvents = await app.action('all').read({
             params: {
                 filter: evtQuery
             }
