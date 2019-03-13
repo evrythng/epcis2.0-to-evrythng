@@ -27,7 +27,7 @@ module.exports.capture = async (events, context) => {
         }
         return {
             statusCode: 200,
-            body: JSON.stringify(createdEvents.map(e => e.customFields)),
+            body: JSON.stringify(createdEvents.map(epcisEvents.printEvent)),
         };
     } catch (error) {
         return {
@@ -61,7 +61,7 @@ module.exports.getEvents = async (events, context) => {
             }
         }).then();
         if (returnedEvents.length > 0)
-            returnedEvents = returnedEvents.map(x => x.customFields);
+            returnedEvents = returnedEvents.map(epcisEvents.printEvent);
         return {
             statusCode: 200,
             body: JSON.stringify(returnedEvents)
@@ -86,7 +86,7 @@ module.exports.getEventById = async (events, context) => {
             }
         }).then();
         if (returnedEvents.length > 0)
-            returnedEvents = returnedEvents.map(x => x.customFields);
+            returnedEvents = returnedEvents.map(epcisEvents.printEvent);
         return {
             statusCode: 200,
             body: JSON.stringify(returnedEvents),
@@ -102,8 +102,6 @@ module.exports.getEventById = async (events, context) => {
 
 
 module.exports.debug = async (events, context) => {
-
-
     return {
         statusCode: 200,
         body: JSON.stringify(events),

@@ -344,13 +344,6 @@ class EPCISEvent {
         this._customFields = value;
     }
 
-    get createdAt() {
-        return this._createdAt;
-    }
-
-    set createdAt(value) {
-        this._createdAt = value;
-    }
 
     get timestamp() {
         return this._timestamp;
@@ -410,8 +403,6 @@ class EPCISEvent {
     }
 
     async addAction(epcList) {
-        print(this.bizLocation)
-
         this.collection = (await addAction(this.app)(epcList, true, this.bizLocation)).id;
     }
 
@@ -438,7 +429,7 @@ class EPCISEvent {
         this.app = app;
         this._customFields = event;
         this._type = `_${event.isA}`;
-        if (event.hasOwnProperty('eventID')||event.hasOwnProperty('eventId')) {
+        if (event.hasOwnProperty('eventID') || event.hasOwnProperty('eventId')) {
             this._identifiers['eventID'] = event.eventID;
         }
         if (event.hasOwnProperty('eventTime')) {
@@ -506,3 +497,9 @@ class AggregationEvent extends EPCISEvent {
 
 exports.ObjectEvent = ObjectEvent;
 exports.AggregationEvent = AggregationEvent;
+exports.printEvent = eventAction => {
+    const customFields = eventAction.customFields||{};
+    // recordTime is required by EPCIS. Since this timestamp is created by the backend, it won't be in a custom field.
+    customFields.recordTime = (new Date(eventAction.createdAt)).toISOString();
+    return customFields;
+};
