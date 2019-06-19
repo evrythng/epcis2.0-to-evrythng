@@ -2,6 +2,10 @@
 
 A proxy to use the upcoming EPCIS 2.0 standard with the EVRYTHNG API. EPCIS 2.0 is the latest update of the GS1 EPCIS standard and is currently being developed by the EPCIS and CBV 2.0 MSWG. The standard has not been ratified yet, hence consider everything you see here tentative.
 
+## Developer documentation
+
+You can find a full tutorial of how to use the proxy in the [EVRYTHNG developer documentation](https://developers.evrythng.com/docs/epcis-20-repository).
+
 
 ## Overview of the EPCIS 2.0 Proxy
 
