@@ -2,10 +2,11 @@
 
 const querystring = require('querystring');
 const epcisEvents = require('./epcisEvents');
+const print = console.log;
 
 const operatorMapping = {
     'eq': (x, y, r) => `${x}=${r?r:""}${y}`,
-    'in': (x, y, r) => {
+    'exists': (x, y, r) => {
         return expandList(x, '=', parseArgsList(y), r)
     },
     'gt': (x, y, r) => `${x}>${r?r:""}${y}`,
@@ -14,28 +15,25 @@ const operatorMapping = {
     'le': (x, y, r) => `${x}<${r?r:""}${y}`,
 };
 
-function binaryExp(exp) {
-    const operators = new Set(Object.keys(operatorMapping).map(x=>` ${x} `));
-    let op = null;
-    let j = null;
-    for (let i = exp.length; i >= 0; i--) {
-        j = i - 4;
-        if (j >= 0 && operators.has(exp.slice(j, i))) {
-            op = exp.slice(j, i);
-            return [op.trim(), exp.slice(0, j).trim(), exp.slice(i,)];
-        }
-    }
-    return null;
+function tokenizeExp(exp) {
+    let idx = {};
+    for (let i = exp.length; i >=0; i--)
+        idx[exp[i]] = i;
+    if ('_' in idx)
+        return [exp.slice(0, idx['_']), exp.slice(idx['_'] + 1, idx['=']), exp.slice(idx['='] + 1,)];
+    else
+        return [exp.slice(0, idx['=']), undefined, exp.slice(idx['='] + 1,)];
+
 }
 
-function expandList(leftArg, op, rightArgs, rightPrefix) {
-    if (rightPrefix === undefined)
-        rightPrefix = '';
-    const rightArg = `${rightPrefix}${rightArgs.pop()}`;
+function expandList(leftArg, op, rightArgs, prefix) {
+    if (prefix === undefined)
+        prefix = '';
+    const rightArg = `${prefix}${rightArgs.pop()}`;
     if (rightArgs.length === 0) {
         return `${leftArg}${op}${rightArg}`
     } else {
-        return `${expandList(leftArg, op, rightArgs, rightPrefix)},${rightArg}`
+        return `${expandList(leftArg, op, rightArgs, prefix)},${rightArg}`
     }
 }
 
@@ -46,31 +44,36 @@ function parseArgsList(args) {
 
 
 exports.filter = query => {
+
+
     query = querystring.unescape(query);
     query = query.replace(/['"]/g, "");
-    let queryTokens = [];
-    let op;
-    let left;
-    let right;
-    let rightPrefix = '';
-    for (const exp of query.split('&')) {
-        let tokens = binaryExp(exp);
 
+    let queryTokens = [];
+
+    for (const exp of query.split('&')) {
+        let tokens = tokenizeExp(exp);
+        let op;
+        let left;
+        let right;
+        let prefix = '';
         if (tokens !== null) {
-            op = tokens[0];
+            op = tokens[0].toLowerCase();
             left = tokens[1];
             right = tokens[2];
 
             switch (left) {
                 case 'eventType':
                     left = 'type';
-                    rightPrefix = "_";
+                    prefix = "_";
                     break;
-                case 'time':
+                case 'eventTime':
                     left = 'timestamp';
+                    right = (new Date(right)).getTime();
                     break;
                 case 'recordTime':
                     left = 'timestamp';
+                    right = (new Date(right)).getTime();
                     break;
                 case 'eventID':
                     left = 'identifiers.eventID';
@@ -81,14 +84,19 @@ exports.filter = query => {
                     break;
                 case 'readPoint':
                     left = 'tags';
-                    rightPrefix = 'readPoint:';
+                    prefix = 'readPoint:';
                     break;
                 case 'bizLocation':
                     left = 'tags';
-                    rightPrefix = 'bizLocation:';
+                    prefix = 'bizLocation:';
                     break;
+                case 'bizStep':
+                    left = 'tags';
+                    prefix = 'bizStep:';
+
             }
-            queryTokens.push(operatorMapping[op](left, right, rightPrefix));
+
+            queryTokens.push(operatorMapping[op](left, right, prefix));
         }
     }
     return queryTokens.join('&')
@@ -129,7 +137,7 @@ exports.eventTypeConstraintConsistency = query => {
     return true;
 };
 
-    exports.simpleEventLookupQuery = (epcisEventType, eventID) => {
+exports.simpleEventLookupQuery = (epcisEventType, eventID) => {
     if (epcisEventType === undefined) {
         throw "EPCIS event type cannot be empty";
     }
@@ -146,4 +154,8 @@ exports.eventTypeConstraintConsistency = query => {
     if (eventID !== undefined)
         query += `&identifiers.eventID=${eventID}`;
     return query;
+};
+
+exports.encodeAsQueryString = function(d) {
+    return Object.keys(d).map(k=>`${k}=${d[k]}`).join('&')
 };
