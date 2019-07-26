@@ -5,40 +5,6 @@ const print = console.log
 
 const epcToTuple = epc => [epc.slice(0, epc.lastIndexOf(':')), epc.slice(epc.lastIndexOf(':') + 1,)]
 
-function singledispatch(fn) {
-    let registry = {};
-    let global = null;
-    let mainFn = async (keyValue) => {
-        if (global === null) {
-            throw Error('No global variables set');
-        }
-        let key = keyValue[0];
-        let value = keyValue[1];
-        let result = null;
-        if (key in registry) {
-            result = await registry[key](global)(value);
-        } else {
-            result = await fn(global)(value);
-        }
-
-        if (result.length === undefined) { // let's try to be a bit consistent and always return an array.
-            return [result];
-        } else {
-            return result;
-        }
-    };
-    mainFn.register = (key, fn) => {
-        registry[key] = fn;
-    };
-    mainFn.setGlobals = (arg) => {
-        global = arg;
-    };
-    return mainFn
-}
-
-const lookupGS1Resource = singledispatch(app => async epc => {
-    throw Error(`Resource not found ${epc}`);
-});
 
 const lookupGS1Thng = app => async epc => {
 
@@ -65,11 +31,12 @@ const lookupGS1Thng = app => async epc => {
     return thng;
 };
 
-lookupGS1Resource.register("urn:epc:id:sgln", app => async epc => {
-
+const lookupPlace = app => async epc => {
+    const identifier = epcToTuple(epc)[0];
+    const _epc = epcToTuple(epc)[1];
     let place = await app.place().read({
         params: {
-            filter: `identifiers.urn:epc:id:sgln=${epc}`
+            filter: `${identifier}=${_epc}`
         }
     }).then();
     if (place.length > 1) {
@@ -77,7 +44,7 @@ lookupGS1Resource.register("urn:epc:id:sgln", app => async epc => {
     } else {
         return place;
     }
-});
+};
 
 
 // see https://github.com/evrythng/gs1-digital-link-tools/blob/master/src/data/alpha-map.json
@@ -113,8 +80,8 @@ const alphaMap = {
 
 const createOrLookupPlace = app => async (identifierEpc) => {
 
-
-    const identifier = identifierEpc[0].split(":").pop();
+    print('createOrLookupPlace')
+    const identifier = identifierEpc[0];
     const epc = identifierEpc[1];
     const invIdx = {};
     for (let a in alphaMap)
@@ -123,16 +90,17 @@ const createOrLookupPlace = app => async (identifierEpc) => {
 
     let place = await app.place().read({
         params: {
-            filter: `identifiers.gs1:${invIdx[identifier]}=${epc}`
+            filter: `identifiers.${identifier}=${epc}`
         }
-    }).then();
+    });
 
     if (place.length === 0) {
         let placeIdentifiers = {}
-        placeIdentifiers[`gs1:${invIdx[identifier]}`] = epc;
-        return await app.place().create({
+        print('createOrLookupPlace place len == 0')
+        placeIdentifiers[identifier] = epc;
+        place = await app.place().create({
             name: `Demo epcis place ${epc}. Please update me`,
-            identifiers: placeIdentifiers,
+            identifiers:  placeIdentifiers,
             "position": {
                 "type": "Point",
                 "coordinates": [
@@ -140,19 +108,22 @@ const createOrLookupPlace = app => async (identifierEpc) => {
                     21.94304553343818
                 ]
             }
-        }).then()
-    } else {
-        return place;
+        });
     }
+    return [place]
 };
 
 const createOrLookupGS1Place = app => async epc => {
-    lookupGS1Resource.setGlobals(app);
-    let place = await lookupGS1Resource(["urn:epc:id:sgln", epc]);
+    print('debug createOrLookupGS1Place ')
+    let place = await lookupPlace(app)(epc);
+    print(place)
     if (place.length === 0) {
+        print('debug createOrLookupGS1Place place len == 0')
+        const identifier = epcToTuple(epc)[0];
+        const epc = epcToTuple(epc)[1];
         place = await app.place().create({
             name: `Demo epcis place ${epc}. Please update me`,
-            identifiers: {"urn:epc:id:sgln": epc},
+            identifiers: {identifier: epc},
             "position": {
                 "type": "Point",
                 "coordinates": [
@@ -160,12 +131,13 @@ const createOrLookupGS1Place = app => async epc => {
                     21.94304553343818
                 ]
             }
-        }).then()
+        })
     }
     return place;
 };
 
 const createOrLookupGS1Product = app => async epc => {
+    print(epc)
     let sgtinGtin = epc.split('.');
     let sgtin = sgtinGtin.pop();
     let gtin = sgtinGtin.join('');
@@ -175,11 +147,14 @@ const createOrLookupGS1Product = app => async epc => {
             filter: "identifiers.gs1:01=" + gtin
         }
     }).then();
+
     if (product.length === 0) {
-        return await app.product().create({
+        print('debug')
+        product = await app.product().create({
             name: `epcis product gtin ${gtin}`,
             identifiers: {"gs1:01": gtin}
         }).then()
+        return [product]
     } else {
         return product
     }
@@ -187,7 +162,7 @@ const createOrLookupGS1Product = app => async epc => {
 
 
 const createOrLookupGS1Thng = app => async epc => {
-
+    print('debug createOrLookupGS1Thng '+ epc)
     let sgtinGtin = epc.split('.');
     let sgtin = sgtinGtin.pop();
     let thng = null;
@@ -214,6 +189,7 @@ const addAction = app => async (epcList, allowExisting, bizLocation) => {
         allowExisting = false;
     }
     print('epcisAddAction debug ')
+    print(epcList)
     let withoutPrefix = epcList.map(epc => epc.slice(epc.lastIndexOf(':') + 1,));
     let productsGtins = withoutPrefix.map(epc => epc.split('.').slice(0, 2)).map(s => s.join(''));
     productsGtins = new Set(productsGtins);
@@ -238,25 +214,26 @@ const addAction = app => async (epcList, allowExisting, bizLocation) => {
 
     print('epcisAction 3')
     if (!allowExisting &&
-        (await Promise.all(epcList.map(epcToTuple).map(e => e[1]).map(lookupGS1Thng(app))).then()).join("").length !== 0) {
+        (await Promise.all(epcList.map(epcToTuple).map(e => e[1]).map(lookupGS1Thng(app)))).join("").length !== 0) {
         throw Error('Some thngs already exist. They cannot be added twice')
     }
 
-
-    let thngs = await Promise.all(epcList.map(epcToTuple).map(e => e[1]).map(createOrLookupGS1Thng(app))).then()
+    print('epcisAction 4')
+    let thngs = await Promise.all(epcList.map(epcToTuple).map(e => e[1]).map(createOrLookupGS1Thng(app)))
     if (bizLocation !== undefined) {
         for (let thng of thngs) {
-            print(bizLocation.id)
-            print(await app.thng(thng.id).location().update([{place: bizLocation.id}]).then())
+            print(bizLocation.id);
+            await app.thng(thng.id).location().update([{place: bizLocation.id}]);
         }
 
     }
-
+    print('epcisAction 5')
     let collection = await app.collection().create({
         name: `epcis add event collection`,
-    }).then();
-    await app.collection(collection.id).thng().update(thngs.map(t => t.id)).then()
-
+    });
+    await app.collection(collection.id).thng().update(thngs.map(t => t.id))
+    print('epcisAction 6')
+    print('collection '+ JSON.stringify(collection))
     return collection;
 };
 
@@ -272,7 +249,7 @@ const deleteAction = app => async (epcList) => {
             params: {
                 filter: `identifiers.gs1:01=${gtin}`
             }
-        }).then();
+        });
 
         if (Object.keys(product).length === 0)
             throw `Invalid EPC  because product ${gtin} does not exist.`
@@ -282,35 +259,40 @@ const deleteAction = app => async (epcList) => {
     // print(epcList)
     // print(epcList.map(epcToTuple).map(a=>a))
 
-    let thngs = await Promise.all(epcList.map(epcToTuple).map(e => e[1]).map(createOrLookupGS1Thng(app))).then()
+    let thngs = await Promise.all(epcList.map(epcToTuple).map(e => e[1]).map(createOrLookupGS1Thng(app)))
     thngs = thngs.reduce((x, y) => x.concat(y)).map(t => t.id);
     print('deleteAction 3')
     if (thngs.length !== epcList.length) {
         throw Error('Could not find all the EPCs specified in the event')
     }
-    await Promise.all(thngs.map(t => t.delete())).then()
+    await Promise.all(thngs.map(t => t.delete()))
 };
 
-const observeAction = app => async (epcList, bizLocation) => {
+const observeAction = app => async (epcList) => {
     print('observeAction debug ');
+    // print(bizLocation)
     let withoutPrefix = epcList.map(epc => epc.slice(epc.lastIndexOf(':') + 1,));
     let productsGtins = withoutPrefix.map(epc => epc.split('.').slice(0, 2)).map(s => s.join(''));
+    print('observeAction debug 1');
     productsGtins = new Set(productsGtins);
+    print(productsGtins)
     let existingProducts = {};
     for (const gtin of productsGtins) {
         let product = await app.product().read({
             params: {
                 filter: `identifiers.gs1:01=${gtin}`
             }
-        }).then();
+        });
+        print(product)
 
         if (Object.keys(product).length === 0)
             throw `Invalid EPC  because product ${gtin} does not exist.`
         existingProducts[gtin] = product.pop()
     }
     print('observeAction 2')
+    print(epcList)
 
-    let thngs = await Promise.all(epcList.map(epcToTuple).map(e => e[1]).map(createOrLookupGS1Thng(app))).then();
+    let thngs = await Promise.all(epcList.map(epcToTuple).map(e => e[1]).map(createOrLookupGS1Thng(app)));
     // thngs = thngs.reduce((x, y) => x.concat(y));
     print('observeAction 3')
     if (thngs.length !== epcList.length) {
@@ -318,12 +300,12 @@ const observeAction = app => async (epcList, bizLocation) => {
     }
 
     if (bizLocation !== undefined) {
-        await Promise.all(thngs.map(t => app.thng(t.id).location().update([{place: bizLocation.id}]))).then()
+        await Promise.all(thngs.map(t => app.thng(t.id).location().update([{place: bizLocation.id}])))
     }
     let collection = await app.collection().create({
         name: `epcis observe event collection`,
-    }).then();
-    await app.collection(collection.id).thng().update(thngs.map(t => t.id)).then()
+    });
+    await app.collection(collection.id).thng().update(thngs.map(t => t.id))
     return collection;
 };
 
@@ -403,11 +385,15 @@ class EPCISEvent {
     }
 
     async addAction(epcList) {
+        print('event top class start')
         this.collection = (await addAction(this.app)(epcList, true, this.bizLocation)).id;
+        print('event top class stop')
     }
 
     async observeAction(epcList) {
-        this.colleciton = (await addAction(this.app)(epcList, this.bizLocation)).id;
+        print('obsreve action start')
+        this.collection = (await observeAction(this.app)(epcList, this.bizLocation)).id;
+        print('obsreve action stop')
     }
 
     async deleteAction(epcList) {
@@ -435,6 +421,10 @@ class EPCISEvent {
         if (event.hasOwnProperty('eventTime')) {
             this.timestamp = (new Date(event.eventTime)).getTime();
         }
+        if (event.hasOwnProperty('bizStep')) {
+            this.tags.push(`bizStep:${event.bizStep}`);
+        }
+
         this.tags.push(`readPoint:${event.readPoint}`);
         this.tags.push(`epcisAction:${event.action}`);
         if (event.hasOwnProperty('bizLocation')) {
@@ -443,20 +433,20 @@ class EPCISEvent {
     }
 
     async init() {
-        let event = this.customFields;
+        let event = this._customFields;
 
         let readPoint = (await createOrLookupPlace(this.app)(epcToTuple(event.readPoint))).pop();
         this.locationSource = 'place';
         this.location = {
-            place: readPoint
+            place: readPoint.id
         };
 
         if (event.hasOwnProperty('bizLocation')) {
             this.bizLocation = (await createOrLookupPlace(this.app)(epcToTuple(event.bizLocation))).pop();
         }
-
-        await this[`${event.action.toLowerCase()}Action`](event.epcList);
-        return this;
+        print('debug init EPCISEvent start ' + JSON.stringify(event))
+        let temp = await this[`${event.action.toLowerCase()}Action`](event.epcList);
+        print('debug init EPCISEvent stop ' + JSON.stringify(this));
 
     }
 
@@ -467,6 +457,7 @@ class EPCISEvent {
                 out[k.slice(1,)] = this[k];
             }
         }
+        print('asEVTActionDocument ' + JSON.stringify(out))
         return out;
     }
 }
@@ -474,7 +465,9 @@ class EPCISEvent {
 class ObjectEvent extends EPCISEvent {
 
     async addAction(epcList) {
+        print('object event start')
         this.collection = (await addAction(this.app)(epcList, false, this.bizLocation)).id;
+        print('object event stop')
     }
 
     async deleteAction(epcList) {
@@ -485,9 +478,7 @@ class ObjectEvent extends EPCISEvent {
 
 class AggregationEvent extends EPCISEvent {
 
-    async addAction(epcList) {
-        this.collection = (await addAction(this.app)(epcList, true)).id;
-    }
+
 
     async deleteAction(epcList) {
         await deleteAction(this.app)(epcList)
@@ -495,6 +486,9 @@ class AggregationEvent extends EPCISEvent {
 
 }
 
+exports.createOrLookupGS1Product = createOrLookupGS1Product;
+exports.createOrLookupGS1Thng = createOrLookupGS1Thng;
+exports.createOrLookupGS1Place = createOrLookupGS1Place;
 exports.ObjectEvent = ObjectEvent;
 exports.AggregationEvent = AggregationEvent;
 exports.printEvent = eventAction => {

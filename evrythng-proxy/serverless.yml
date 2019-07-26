@@ -94,8 +94,6 @@ functions:
             parameters:
               path:
                 eventType: true
-              querystrings:
-                $filter: true
               headers:
                 Authorization: false
 
