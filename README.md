@@ -164,13 +164,13 @@ List events that are either [Aggregation or Object Events and that occurred at t
 **Request**
 
 ```bash
-curl 'https://epcis.evrythng.io/v2_0/events/all?GT_recordTime=2015-03-15T00:00:00.000-04:00&EQ_action=OBSERVE' -H "Content-Type: application/json"
+curl 'https://epcis.evrythng.io/v2_0/events/all?EQ_eventType=ObjectEvent,AggregationEvent&EQ_bizLocation=urn:epc:id:sgln:0614141.00888.0' -H "Content-Type: application/json"
 ``` 
 
 **Response**
 
 ```json
-[{"action":"OBSERVE","bizStep":"urn:epcglobal:cbv:bizstep:shipping","bizTransactionList":[{"bizTransaction":"http://transaction.acme.com/po/12345678","type":"urn:epcglobal:cbv:btt:po"}],"disposition":"urn:epcglobal:cbv:disp:in_transit","epcList":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"eventTime":"2019-06-27T20:35:31.116-06:00","eventTimeZoneOffset":"-06:00","isA":"ObjectEvent","readPoint":"urn:epc:id:sgln:0614141.07346.1234","recordTime":"2019-07-22T10:45:13.080Z"}]
+[{"action":"OBSERVE","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:epcglobal:cbv:bizstep:receiving","destinationList":[{"destination":"urn:epc:id:sgln:0614141.00001.0","type":"urn:epcglobal:cbv:sdt:owning_party"},{"destination":"urn:epc:id:sgln:0614141.00777.0","type":"urn:epcglobal:cbv:sdt:location"}],"disposition":"urn:epcglobal:cbv:disp:in_progress","eventID":"oe3","eventTime":"2013-06-08T14:58:56.591+00:00","eventTimeZoneOffset":"+02:00","example:myField":{"#text":"Example of a vendor/user extension","@xmlns:example":"http://ns.example.com/epcis"},"isA":"ObjectEvent","quantityList":[{"epcClass":"urn:epc:class:lgtin:4012345.012345.998877","quantity":200,"uom":"KGM"}],"readPoint":"urn:epc:id:sgln:0614141.00777.0","sourceList":[{"source":"urn:epc:id:sgln:4012345.00001.0","type":"urn:epcglobal:cbv:sdt:possessing_party"},{"source":"urn:epc:id:sgln:4012345.00225.0","type":"urn:epcglobal:cbv:sdt:location"}],"recordTime":"2019-05-21T09:42:00.862Z"}]
 ```
 
 ## Related projects
