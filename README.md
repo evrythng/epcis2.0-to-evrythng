@@ -49,64 +49,62 @@ Danny Haak developed a handy [EPCIS 2.0 XML to JSON converter](https://mimasu.nl
 **Request**
 
 ```bash
-curl -X POST "https://epcis.evrythng.io/v2_0/capture" -H "Content-Type: application/json" -d "@-" <<EOF
+curl -X POST "https://epcis.evrythng.io/v2_0/capture" -H "Content-Type: application/json" -d "@-" << EOF
 {
-  "@context": "https://id.gs1.org/epcis-context.jsonld",
-  "isA": "EPCISDocument",
-  "creationDate": "2005-07-11T11:30:47+00:00",
-  "schemaVersion": 1.2,
-  "format": "application/ld+json",
-  "epcisBody": {
-    "eventList": [
-      {
-        "isA": "ObjectEvent",
-        "eventTime": "2005-04-03T20:33:31.116-06:00",
-        "eventTimeZoneOffset": "-06:00",
-        "epcList": [
-          "urn:epc:id:sgtin:0614141.107346.2017",
-          "urn:epc:id:sgtin:0614141.107346.2018"
-        ],
-        "action": "OBSERVE",
-        "bizStep": "urn:epcglobal:cbv:bizstep:shipping",
-        "disposition": "urn:epcglobal:cbv:disp:in_transit",
-        "readPoint": "urn:epc:id:sgln:0614141.07346.1234",
-        "bizTransactionList": [
-          {
-            "type": "urn:epcglobal:cbv:btt:po",
-            "bizTransaction": "http://transaction.acme.com/po/12345678"
-          }
-        ]
-      },
-      {
-        "isA": "ObjectEvent",
-        "eventTime": "2005-04-04T20:33:31.116-06:00",
-        "eventTimeZoneOffset": "-06:00",
-        "epcList": [
-          "urn:epc:id:sgtin:0614141.107346.2018"
-        ],
-        "action": "OBSERVE",
-        "bizStep": "urn:epcglobal:cbv:bizstep:receiving",
-        "disposition": "urn:epcglobal:cbv:disp:in_progress",
-        "readPoint": "urn:epc:id:sgln:0012345.11111.400",
-        "bizLocation": "urn:epc:id:sgln:0012345.11111.0",
-        "bizTransactionList": [
-          {
-            "type": "urn:epcglobal:cbv:btt:po",
-            "bizTransaction": "http://transaction.acme.com/po/12345678"
-          },
-          {
-            "type": "urn:epcglobal:cbv:btt:desadv",
-            "bizTransaction": "urn:epcglobal:cbv:bt:0614141073467:1152"
-          }
-        ],
-        "example:myField": {
-          "@xmlns:example": "http://ns.example.com/epcis",
-          "#text": "Example of a vendor/user extension"
+    "@context": "https://id.gs1.org/epcis-context.jsonld",
+    "isA": "EPCISDocument",
+    "creationDate": "2019-13-06T11:30:47+00:00",
+    "schemaVersion": 1.2,
+    "format": "application/ld+json",
+    "epcisBody": {
+      "eventList": [
+        {
+          "eventID": "oe1",
+          "eventTimeZoneOffset": "-06:00",
+          "eventTime": "2005-04-03T20:33:31.116-06:00",
+          "isA": "ObjectEvent",
+          "epcList": [
+            "urn:epc:id:sgtin:0614141.107346.2017",
+            "urn:epc:id:sgtin:0614141.107346.2018"
+          ],
+          "action": "ADD",
+          "bizStep": "urn:epcglobal:cbv:bizstep:shipping",
+          "disposition": "urn:epcglobal:cbv:disp:in_transit",
+          "readPoint": "urn:epc:id:sgln:0614141.07346.1234",
+          "bizTransactionList": [
+            {
+              "type": "urn:epcglobal:cbv:btt:po",
+              "bizTransaction": "http://transaction.acme.com/po/12345678"
+            }
+          ]
+        },
+        {
+          "isA": "ObjectEvent",
+          "eventID": ":event1",
+          "eventTime": "2005-04-04T20:33:31.116-06:00",
+          "eventTimeZoneOffset": "-06:00",
+          "epcList": [
+            "urn:epc:id:sgtin:0614141.107346.1701"
+          ],
+          "action": "ADD",
+          "bizStep": "urn:epcglobal:cbv:bizstep:receiving",
+          "disposition": "urn:epcglobal:cbv:disp:in_progress",
+          "readPoint": "urn:epc:id:sgln:0012345.11111.400",
+          "bizLocation": "urn:epc:id:sgln:0012345.11111.0",
+          "bizTransactionList": [
+            {
+              "type": "urn:epcglobal:cbv:btt:po",
+              "bizTransaction": "http://transaction.acme.com/po/12345678"
+            },
+            {
+              "type": "urn:epcglobal:cbv:btt:desadv",
+              "bizTransaction": "urn:epcglobal:cbv:bt:0614141073467:1152"
+            }
+          ]
         }
-      }
-    ]
+      ]
+    }
   }
-}
 EOF
 ```
 
@@ -170,13 +168,13 @@ List events that are either [Aggregation or Object Events and that occurred at t
 **Request**
 
 ```bash
-curl -X GET "https://epcis.evrythng.io/v2_0/events/all?$filter=eventType+in+(ObjectEvent,AggregationEvent)&bizLocation+eq+urn:epc:id:sgln:0614141.00888.0" -H "Content-Type: application/json"
+curl 'https://epcis.evrythng.io/v2_0/events/all?EQ_eventType=ObjectEvent,AggregationEvent&EQ_bizLocation=urn:epc:id:sgln:0614141.00888.0' -H "Content-Type: application/json"
 ``` 
 
 **Response**
 
 ```json
-[{"action":"OBSERVE","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:epcglobal:cbv:bizstep:receiving","childEPCs":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"childQuantityList":[{"epcClass":"urn:epc:idpat:sgtin:4012345.098765.*","quantity":"10"},{"epcClass":"urn:epc:class:lgtin:4012345.012345.998877","quantity":"200.5","uom":"KGM"}],"disposition":"urn:epcglobal:cbv:disp:in_progress","eventTime":"2013-06-08T14:58:56.591Z","eventTimeZoneOffset":"+02:00","example:myField":"Example of a vendor/user extension","id":"_:event3","isA":"AggregationEvent","parentID":"urn:epc:id:sscc:0614141.1234567890","readPoint":"urn:epc:id:sgln:0614141.00777.0"},{"action":"OBSERVE","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:epcglobal:cbv:bizstep:receiving","childEPCs":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"childQuantityList":[{"epcClass":"urn:epc:idpat:sgtin:4012345.098765.*","quantity":"10"},{"epcClass":"urn:epc:class:lgtin:4012345.012345.998877","quantity":"200.5","uom":"KGM"}],"disposition":"urn:epcglobal:cbv:disp:in_progress","eventTime":"2013-06-08T14:58:56.591Z","eventTimeZoneOffset":"+02:00","example:myField":"Example of a vendor/user extension","id":"_:event3","isA":"AggregationEvent","parentID":"urn:epc:id:sscc:0614141.1234567890","readPoint":"urn:epc:id:sgln:0614141.00777.0"},{"action":"OBSERVE","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:epcglobal:cbv:bizstep:receiving","childEPCs":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"childQuantityList":[{"epcClass":"urn:epc:idpat:sgtin:4012345.098765.*","quantity":"10"},{"epcClass":"urn:epc:class:lgtin:4012345.012345.998877","quantity":"200.5","uom":"KGM"}],"disposition":"urn:epcglobal:cbv:disp:in_progress","eventTime":"2013-06-08T14:58:56.591Z","eventTimeZoneOffset":"+02:00","example:myField":"Example of a vendor/user extension","id":"_:event3","isA":"AggregationEvent","parentID":"urn:epc:id:sscc:0614141.1234567890","readPoint":"urn:epc:id:sgln:0614141.00777.0"},{"action":"OBSERVE","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:epcglobal:cbv:bizstep:receiving","childEPCs":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"childQuantityList":[{"epcClass":"urn:epc:idpat:sgtin:4012345.098765.*","quantity":"10"},{"epcClass":"urn:epc:class:lgtin:4012345.012345.998877","quantity":"200.5","uom":"KGM"}],"disposition":"urn:epcglobal:cbv:disp:in_progress","eventTime":"2013-06-08T14:58:56.591Z","eventTimeZoneOffset":"+02:00","example:myField":"Example of a vendor/user extension","id":"_:event3","isA":"AggregationEvent","parentID":"urn:epc:id:sscc:0614141.1234567890","readPoint":"urn:epc:id:sgln:0614141.00777.0"},{"action":"OBSERVE","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:epcglobal:cbv:bizstep:receiving","childEPCs":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"childQuantityList":[{"epcClass":"urn:epc:idpat:sgtin:4012345.098765.*","quantity":10},{"epcClass":"urn:epc:class:lgtin:4012345.012345.998877","quantity":200.5,"uom":"KGM"}],"disposition":"urn:epcglobal:cbv:disp:in_progress","eventTime":"2013-06-08T14:58:56.591+00:00","eventTimeZoneOffset":"+02:00","example:myField":{"#text":"Example of a vendor/user extension","@xmlns:example":"http://ns.example.com/epcis"},"isA":"AggregationEvent","parentID":"urn:epc:id:sscc:0614141.1234567890","readPoint":"urn:epc:id:sgln:0614141.00777.0"},{"action":"OBSERVE","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:epcglobal:cbv:bizstep:receiving","childEPCs":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"childQuantityList":[{"epcClass":"urn:epc:idpat:sgtin:4012345.098765.*","quantity":"10"},{"epcClass":"urn:epc:class:lgtin:4012345.012345.998877","quantity":"200.5","uom":"KGM"}],"disposition":"urn:epcglobal:cbv:disp:in_progress","eventTime":"2013-06-08T14:58:56.591Z","eventTimeZoneOffset":"+02:00","example:myField":"Example of a vendor/user extension","id":"_:event3","isA":"AggregationEvent","parentID":"urn:epc:id:sscc:0614141.1234567890","readPoint":"urn:epc:id:sgln:0614141.00777.0"},{"action":"OBSERVE","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:epcglobal:cbv:bizstep:receiving","childEPCs":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"childQuantityList":[{"epcClass":"urn:epc:idpat:sgtin:4012345.098765.*","quantity":"10"},{"epcClass":"urn:epc:class:lgtin:4012345.012345.998877","quantity":"200.5","uom":"KGM"}],"disposition":"urn:epcglobal:cbv:disp:in_progress","eventTime":"2013-06-08T14:58:56.591Z","eventTimeZoneOffset":"+02:00","example:myField":"Example of a vendor/user extension","id":"_:event3","isA":"AggregationEvent","parentID":"urn:epc:id:sscc:0614141.1234567890","readPoint":"urn:epc:id:sgln:0614141.00777.0"},{"action":"OBSERVE","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:epcglobal:cbv:bizstep:receiving","childEPCs":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"childQuantityList":[{"epcClass":"urn:epc:idpat:sgtin:4012345.098765.*","quantity":"10"},{"epcClass":"urn:epc:class:lgtin:4012345.012345.998877","quantity":"200.5","uom":"KGM"}],"disposition":"urn:epcglobal:cbv:disp:in_progress","eventTime":"2013-06-08T14:58:56.591Z","eventTimeZoneOffset":"+02:00","example:myField":"Example of a vendor/user extension","id":"_:event3","isA":"AggregationEvent","parentID":"urn:epc:id:sscc:0614141.1234567890","readPoint":"urn:epc:id:sgln:0614141.00777.0"},{"action":"OBSERVE","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:epcglobal:cbv:bizstep:receiving","childEPCs":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"childQuantityList":[{"epcClass":"urn:epc:idpat:sgtin:4012345.098765.*","quantity":"10"},{"epcClass":"urn:epc:class:lgtin:4012345.012345.998877","quantity":"200.5","uom":"KGM"}],"disposition":"urn:epcglobal:cbv:disp:in_progress","eventTime":"2013-06-08T14:58:56.591Z","eventTimeZoneOffset":"+02:00","example:myField":"Example of a vendor/user extension","id":"_:event3","isA":"AggregationEvent","parentID":"urn:epc:id:sscc:0614141.1234567890","readPoint":"urn:epc:id:sgln:0614141.00777.0"},{"action":"OBSERVE","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:epcglobal:cbv:bizstep:receiving","childEPCs":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"childQuantityList":[{"epcClass":"urn:epc:idpat:sgtin:4012345.098765.*","quantity":"10"},{"epcClass":"urn:epc:class:lgtin:4012345.012345.998877","quantity":"200.5","uom":"KGM"}],"disposition":"urn:epcglobal:cbv:disp:in_progress","eventTime":"2013-06-08T14:58:56.591Z","eventTimeZoneOffset":"+02:00","example:myField":"Example of a vendor/user extension","id":"_:event3","isA":"AggregationEvent","parentID":"urn:epc:id:sscc:0614141.1234567890","readPoint":"urn:epc:id:sgln:0614141.00777.0"},{"action":"ADD","bizLocation":"urn:epc:id:sgln:0614141.00888.1","bizStep":"urn:fosstrak:demo:bizstep:fmcg:production","bizTransactionList":[{"bizTransaction":"http://transaction.acme.com/po/12345678","type":"urn:epcglobal:cbv:btt:po"},{"bizTransaction":"urn:epcglobal:cbv:bt:0614141073467:1152","type":"urn:epcglobal:cbv:btt:desadv"}],"destinationList":[{"destination":"urn:epc:id:sgln:0614141.00001.0","type":"urn:epcglobal:cbv:sdt:owning_party"}],"disposition":"urn:fosstrak:demo:disp:fmcg:pendingQA","epcList":["urn:epc:id:sgtin:0614141.107346.2011","urn:epc:id:sgtin:0614141.107346.2012"],"eventID":"_:event1","eventTime":"2008-11-09T13:30:17Z","eventTimeZoneOffset":"+00:00","isA":"ObjectEvent","readPoint":"urn:epc:id:sgln:0614141.00777.0","sourceList":[{"source":"urn:epc:id:sgln:4012345.00001.0","type":"urn:epcglobal:cbv:sdt:possessing_party"}]},{"action":"ADD","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:fosstrak:demo:bizstep:fmcg:production","bizTransactionList":[{"bizTransaction":"http://transaction.acme.com/po/12345678","type":"urn:epcglobal:cbv:btt:po"},{"bizTransaction":"urn:epcglobal:cbv:bt:0614141073467:1152","type":"urn:epcglobal:cbv:btt:desadv"}],"destinationList":[{"destination":"urn:epc:id:sgln:0614141.00001.0","type":"urn:epcglobal:cbv:sdt:owning_party"}],"disposition":"urn:fosstrak:demo:disp:fmcg:pendingQA","epcList":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"eventID":"_:event2","eventTime":"2008-11-09T13:30:17Z","eventTimeZoneOffset":"+00:00","isA":"ObjectEvent","readPoint":"urn:epc:id:sgln:0614141.00777.0","sourceList":[{"source":"urn:epc:id:sgln:4012345.00001.0","type":"urn:epcglobal:cbv:sdt:possessing_party"}]}]
+[{"action":"OBSERVE","bizLocation":"urn:epc:id:sgln:0614141.00888.0","bizStep":"urn:epcglobal:cbv:bizstep:receiving","destinationList":[{"destination":"urn:epc:id:sgln:0614141.00001.0","type":"urn:epcglobal:cbv:sdt:owning_party"},{"destination":"urn:epc:id:sgln:0614141.00777.0","type":"urn:epcglobal:cbv:sdt:location"}],"disposition":"urn:epcglobal:cbv:disp:in_progress","eventID":"oe3","eventTime":"2013-06-08T14:58:56.591+00:00","eventTimeZoneOffset":"+02:00","example:myField":{"#text":"Example of a vendor/user extension","@xmlns:example":"http://ns.example.com/epcis"},"isA":"ObjectEvent","quantityList":[{"epcClass":"urn:epc:class:lgtin:4012345.012345.998877","quantity":200,"uom":"KGM"}],"readPoint":"urn:epc:id:sgln:0614141.00777.0","sourceList":[{"source":"urn:epc:id:sgln:4012345.00001.0","type":"urn:epcglobal:cbv:sdt:possessing_party"},{"source":"urn:epc:id:sgln:4012345.00225.0","type":"urn:epcglobal:cbv:sdt:location"}],"recordTime":"2019-05-21T09:42:00.862Z"}]
 ```
 
 ## Related projects
