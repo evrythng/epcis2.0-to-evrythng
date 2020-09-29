@@ -1,0 +1,28 @@
+{
+  "name": "epcis2.0-to-evrythng",
+  "version": "1.0.0",
+  "dependencies": {
+    "@evrythng/eslint-config-evrythng": "github:evrythng/eslint-config-evrythng",
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
+    "evrythng": "^5.9.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-jsdoc": "^22.2.0",
+    "eslint-plugin-mocha": "^6.3.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-security": "^1.4.0",
+    "prettier": "^2.1.2"
+  },
+  "scripts": {
+    "test": "cd evrythng-proxy/test; mocha index.js --timeout 10000"
+  },
+  "eslintConfig": {
+    "extends": "@evrythng/eslint-config-evrythng"
+  }
+}

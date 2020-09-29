@@ -19,7 +19,7 @@ This proxy is a (partial) implementation of the [EPCIS 2.0 bindings](https://git
 
 - Node version > 8.0
 - Serverless version >= 1.36.3
-- evrythng-extended version >= 4.7.2
+- evrythng version >= 5.9.0
 - [EVRYTHNG](https://dashboard.evrythng.com) account
 - [Trusted App API](https://developers.evrythng.com/docs/api-key-scopes-and-permissions#section-trusted-application-api-key)
 - Create two [custom Action types](https://developers.evrythng.com/reference/action-types): `_ObjectEvent`, `_AggregationEvent` 
@@ -28,7 +28,7 @@ This proxy is a (partial) implementation of the [EPCIS 2.0 bindings](https://git
 
 - Make sure serverless is installed globally `npm install serverless -g`
 - If you're deploying the gateway for the first time, [follow these instructions](https://serverless.com).
-- Install evrythng-exgtended `npm i -s evrythng-extended`
+- Install evrythng `npm i -s evrythng`
 - Deploy the new gateway `serverless deploy`
 - Debugging information can be obtained by inspecting log files. For example, to read the latest log files for the capture interface, type `serverless logs -f capture`
 
@@ -112,6 +112,114 @@ EOF
 
 ```python
 [{"action":"OBSERVE","bizStep":"urn:epcglobal:cbv:bizstep:shipping","bizTransactionList":[{"bizTransaction":"http://transaction.acme.com/po/12345678","type":"urn:epcglobal:cbv:btt:po"}],"disposition":"urn:epcglobal:cbv:disp:in_transit","epcList":["urn:epc:id:sgtin:0614141.107346.2017","urn:epc:id:sgtin:0614141.107346.2018"],"eventTime":"2005-04-03T20:33:31.116-06:00","eventTimeZoneOffset":"-06:00","isA":"ObjectEvent","readPoint":"urn:epc:id:sgln:0614141.07346.1234"},{"action":"OBSERVE","bizLocation":"urn:epc:id:sgln:0012345.11111.0","bizStep":"urn:epcglobal:cbv:bizstep:receiving","bizTransactionList":[{"bizTransaction":"http://transaction.acme.com/po/12345678","type":"urn:epcglobal:cbv:btt:po"},{"bizTransaction":"urn:epcglobal:cbv:bt:0614141073467:1152","type":"urn:epcglobal:cbv:btt:desadv"}],"disposition":"urn:epcglobal:cbv:disp:in_progress","epcList":["urn:epc:id:sgtin:0614141.107346.2018"],"eventTime":"2005-04-04T20:33:31.116-06:00","eventTimeZoneOffset":"-06:00","example:myField":{"#text":"Example of a vendor/user extension","@xmlns:example":"http://ns.example.com/epcis"},"isA":"ObjectEvent","readPoint":"urn:epc:id:sgln:0012345.11111.400"}]
+```
+
+**Sensors data**
+
+The EPCIS 2.0 proxy handles also the sensors data and the location.
+
+You just need to add a sensorElementList field with a sensorReport. (It has to be an OBSERVE event)
+
+You can try for example : 
+
+```bash
+curl -X POST "https://epcis.evrythng.io/v2_0/capture" -H "Content-Type: application/json" -d "@-" << EOF
+{
+    "@context": "https://id.gs1.org/epcis-context.jsonld",
+    "isA": "EPCISDocument",
+    "creationDate": "2019-13-06T11:30:47+00:00",
+    "schemaVersion": 1.2,
+    "format": "application/ld+json",
+    "epcisBody": {
+      "eventList": [
+        {
+           "eventID":"eventID",
+           "eventTimeZoneOffset":"-06:00",
+           "eventTime":"2005-04-03T20:33:31.116-06:00",
+           "isA":"ObjectEvent",
+           "epcList":[
+              "urn:epc:id:sgtin:0614141.107346.2017",
+              "urn:epc:id:sgtin:0614141.107346.2018"
+           ],
+           "action":"OBSERVE",
+           "bizStep":"urn:epcglobal:cbv:bizstep:shipping",
+           "disposition":"urn:epcglobal:cbv:disp:in_transit",
+           "readPoint":"urn:epc:id:sgln:0614141.07346.1234",
+           "sensorElementList":[
+              {
+                 "sensorReport":[
+                    {
+                       "type":"gs1:Temperature",
+                       "value":17.0
+                    },
+                    {
+                       "type":"gs1:Latitude",
+                       "stringValue":"53.553747"
+                    },
+                    {
+                       "type":"gs1:Longitude",
+                       "stringValue":"8.562372"
+                    }
+                 ]
+              }
+           ],
+           "bizTransactionList":[
+              {
+                 "type":"urn:epcglobal:cbv:btt:po",
+                 "bizTransaction":"http://transaction.acme.com/po/12345678"
+              }
+           ]
+        }
+      ]
+    }
+  }
+EOF
+```
+
+**Response**
+
+```JSON
+[
+    {
+        "action": "OBSERVE",
+        "bizStep": "urn:epcglobal:cbv:bizstep:shipping",
+        "bizTransactionList": [
+            {
+                "bizTransaction": "http://transaction.acme.com/po/12345678",
+                "type": "urn:epcglobal:cbv:btt:po"
+            }
+        ],
+        "disposition": "urn:epcglobal:cbv:disp:in_transit",
+        "epcList": [
+            "urn:epc:id:sgtin:0614141.107346.2017",
+            "urn:epc:id:sgtin:0614141.107346.2018"
+        ],
+        "eventID": "eventID",
+        "eventTime": "2005-04-03T20:33:31.116-06:00",
+        "eventTimeZoneOffset": "-06:00",
+        "isA": "ObjectEvent",
+        "readPoint": "urn:epc:id:sgln:0614141.07346.1234",
+        "sensorElementList": [
+            {
+                "sensorReport": [
+                    {
+                        "type": "gs1:Temperature",
+                        "value": 17
+                    },
+                    {
+                        "stringValue": "53.553747",
+                        "type": "gs1:Latitude"
+                    },
+                    {
+                        "stringValue": "8.562372",
+                        "type": "gs1:Longitude"
+                    }
+                ]
+            }
+        ],
+        "recordTime": "2020-09-29T09:32:07.350Z"
+    }
+]
 ```
 
 ### Return events of any type
