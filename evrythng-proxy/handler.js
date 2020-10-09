@@ -20,7 +20,7 @@ function loadEVTApp(headers) {
       fs.readFileSync('publicaccess.secret').toString().trim(),
     );
   }
-  throw Error('Cannot access EPCIS database. No api key available');
+  throw new Error('Cannot access EPCIS database. No api key available');
 }
 
 /**

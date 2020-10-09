@@ -37,7 +37,7 @@ const lookupGS1Thng = (app) => async (epc) => {
 
   product = product.pop();
   if (Object.keys(product).length === 0) {
-    throw Error(`gtin ${gtin} not found`);
+    throw new Error(`gtin ${gtin} not found`);
   }
   return app.thng().read({
     params: {
@@ -60,7 +60,7 @@ const lookupPlace = (app) => async (epc) => {
     },
   });
   if (place.length > 1) {
-    throw Error(`More than one entry found for ${epc}`);
+    throw new Error(`More than one entry found for ${epc}`);
   } else {
     return place;
   }
@@ -251,7 +251,7 @@ const addAction = (app) => async (epcList, allowExisting, bizLocation) => {
       )
     ).join('').length !== 0
   ) {
-    throw Error('Some thngs already exist. They cannot be added twice');
+    throw new Error('Some thngs already exist. They cannot be added twice');
   }
 
   print('epcisAction 4');
@@ -309,7 +309,7 @@ const deleteAction = (app) => async (epcList) => {
       });
 
       if (Object.keys(product).length === 0)
-        throw Error(`Invalid EPC  because product ${gtin} does not exist.`);
+        throw new Error(`Invalid EPC  because product ${gtin} does not exist.`);
     });
   });
 
@@ -324,7 +324,7 @@ const deleteAction = (app) => async (epcList) => {
   thngs = thngs.reduce((x, y) => x.concat(y)).map((t) => t.id);
   print('deleteAction 3');
   if (thngs.length !== epcList.length) {
-    throw Error('Could not find all the EPCs specified in the event');
+    throw new Error('Could not find all the EPCs specified in the event');
   }
   await Promise.all(thngs.map((t) => t.delete()));
 };
@@ -353,7 +353,7 @@ const observeAction = (app) => async (epcList, bizLocation, sensorsValues) => {
       });
 
       if (Object.keys(product).length === 0)
-        throw Error(`Invalid EPC  because product ${gtin} does not exist.`);
+        throw new Error(`Invalid EPC  because product ${gtin} does not exist.`);
     });
   });
 
@@ -367,7 +367,7 @@ const observeAction = (app) => async (epcList, bizLocation, sensorsValues) => {
   );
 
   if (thngs.length !== epcList.length) {
-    throw Error('Could not find all the EPCs specified in the event');
+    throw new Error('Could not find all the EPCs specified in the event');
   }
 
   // print('observe action 4');
@@ -421,23 +421,17 @@ const observeAction = (app) => async (epcList, bizLocation, sensorsValues) => {
 
   promises = [];
 
+  if (locationPayload[0].position.coordinates.length === 2) {
+    // If I have an element in the coordinates field, that means I have to update the location in EVRYTHNG cloud
+    thngs.forEach((thng) => promises.push(app.thng(thng[0].id).locations().update(locationPayload)));
+  }
+
   // for each thngs in the EPC list, I update the properties
   thngs.forEach((thng) => {
     promises.push(app.thng(thng[0].id).property().update(propertiesPayload));
   });
 
   await Promise.all(promises);
-
-  if (locationPayload[0].position.coordinates.length === 2) {
-    // If I have an element in the coordinates field, that means I have to update the location in EVRYTHNG cloud
-    // print(`update location with ${locationPayload}`);
-
-    promises = [];
-
-    thngs.forEach((thng) => promises.push(app.thng(thng[0].id).locations().update(locationPayload)));
-
-    await Promise.all(promises);
-  }
 
 };
 
@@ -534,7 +528,7 @@ class EPCISEvent {
   /* eslint-disable class-methods-use-this */
   /* eslint-disable no-unused-vars */
   async deleteAction(epcList) {
-    throw Error('deleteAction not implemented');
+    throw new Error('deleteAction not implemented');
   }
   /* eslint-disable class-methods-use-this */
   /* eslint-disable no-unused-vars */
