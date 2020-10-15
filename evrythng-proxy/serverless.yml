@@ -11,57 +11,21 @@
 #
 # Happy Coding!
 
-service: epcis-evrythng-proxy # NOTE: update this with your service name
-
-# You can pin your service to only deploy with a specific Serverless version
-# Check out our docs for more details
-# frameworkVersion: "=X.X.X"
-
-
-
+service: clement-epcis-proxy # NOTE: update this with your service name
 
 provider:
   name: aws
-  runtime: nodejs8.10
+  runtime: nodejs12.x
 
-# you can overwrite defaults here
-  stage: labs
-  region: us-east-1
-
-
-
-# you can add statements to the Lambda function's IAM Role here
-#  iamRoleStatements:
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:ListBucket"
-#      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:PutObject"
-#      Resource:
-#        Fn::Join:
-#          - ""
-#          - - "arn:aws:s3:::"
-#            - "Ref" : "ServerlessDeploymentBucket"
-#            - "/*"
-
-# you can define service wide environment variables here
-#  environment:
-#    variable1: value1
-
-# you can add packaging information here
 package:
   include:
     - events.js
     - epcisquery.js
     - publicaccess.secret
-    - node_modules/**
-#    - include-me-dir/**
-  exclude:
+    - ../node_modules/**
 
+  exclude:
     - packages.json
-#    - exclude-me-dir/**
 
 functions:
   capture:
@@ -117,8 +81,6 @@ functions:
       - http:
           path: debug
           method: get
-
-
 
 
 #      - s3: ${env:BUCKET}
